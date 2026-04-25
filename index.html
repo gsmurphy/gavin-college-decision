@@ -31,12 +31,25 @@
   }
 
   .scene {
-    width: 100%;
-    max-width: 1000px;
+    /* Card width is the smallest of: the viewport width minus body padding,
+       the viewport height (minus padding) translated into the equivalent
+       9:6 landscape width, or the desktop cap of 1000px. This guarantees
+       the card always fits the viewport in any orientation — no scrolling
+       on phones in landscape, no overflow ever. */
+    width: min(100%, (100dvh - 80px) * 1.5, 1000px);
     perspective: 2400px;
     /* Establish a size container so back-of-card text can scale with the
        card width (cqw units) — keeps text readable on phones. */
     container-type: inline-size;
+  }
+
+  /* On phones, give the card more room by trimming the body's vertical
+     padding. Combined with the width-and-height constraint above, the
+     card should fit any phone screen in either orientation. */
+  @media (max-width: 600px) {
+    body {
+      padding: 12px;
+    }
   }
 
   .card {
