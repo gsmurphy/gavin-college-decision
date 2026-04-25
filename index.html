@@ -34,6 +34,9 @@
     width: 100%;
     max-width: 1000px;
     perspective: 2400px;
+    /* Establish a size container so back-of-card text can scale with the
+       card width (cqw units) — keeps text readable on phones. */
+    container-type: inline-size;
   }
 
   .card {
@@ -109,7 +112,9 @@
     padding: 2px 12px 8px;
   }
   .back-title-strip .preamble {
-    font-size: 20px;
+    /* Scales with card width (cqw) — capped at 20px on desktop, floors at
+       11px on phones so it stays legible. */
+    font-size: clamp(11px, 2cqw, 20px);
     font-style: italic;
     font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
     color: #00539B;
@@ -117,7 +122,9 @@
     line-height: 1.1;
   }
   .back-title-strip h2 {
-    font-size: 34px;
+    /* Same scaling treatment for the headline. white-space:nowrap removed
+       so on very narrow phones the title can wrap rather than overflow. */
+    font-size: clamp(13px, 3.4cqw, 34px);
     font-weight: 400;
     margin: 0;
     color: #00539B;
@@ -125,7 +132,6 @@
     letter-spacing: 0.02em;
     text-align: center;
     line-height: 1.1;
-    white-space: nowrap;
   }
   .back-cell {
     border-radius: 3px;
@@ -184,8 +190,10 @@
     gap: 4px;
     padding: 8px 4px;
   }
+  /* All cell-text font sizes use clamp(min, Xcqw, max) so they scale with
+     the card width on phones while keeping the desktop look unchanged. */
   .cell-text .line {
-    font-size: 20px;
+    font-size: clamp(11px, 2cqw, 20px);
     line-height: 1.25;
     color: #00539B;  /* St Andrews blue for all body text */
   }
@@ -193,7 +201,7 @@
     font-style: italic;
   }
   .cell-text .line-class {
-    font-size: 30px;
+    font-size: clamp(15px, 3cqw, 30px);
     font-weight: 700;
     letter-spacing: 0.01em;
     margin: 4px 0;
@@ -206,13 +214,13 @@
     margin: 8px 0 4px;
   }
   .cell-text .line-party {
-    font-size: 16px;
+    font-size: clamp(10px, 1.6cqw, 16px);
     font-weight: 600;
     color: #b32028;  /* warm celebratory red */
     letter-spacing: 0.01em;
   }
   .cell-text .line-rsvp {
-    font-size: 13px;
+    font-size: clamp(8px, 1.3cqw, 13px);
     color: #00539B;
     letter-spacing: 0.01em;
     margin-top: 6px;
