@@ -3,7 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gavin's College Decision · 2026 (Landscape v3)</title>
+<title>Gavin's College Decision · 2026</title>
+<meta name="description" content="Gavin Murphy · Class of 2030. Tap to flip — and don't miss the grad party invite!">
+<!-- Open Graph tags so iMessage / Slack / Twitter etc. show a richer link preview -->
+<meta property="og:title" content="Gavin's College Decision · 2026">
+<meta property="og:description" content="Gavin Murphy · Class of 2030. Tap to flip — and don't miss the grad party invite!">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
 <style>
   :root {
     --paper: #eee5cf;
@@ -29,6 +35,12 @@
     padding: 40px 20px;
     color: var(--ink);
   }
+
+  /* Hide the card on first paint and fade it in only after every image,
+     SVG, and font has finished loading. Prevents the "logos popping in
+     one by one" effect — the user sees the card appear all at once. */
+  .scene { opacity: 0; transition: opacity 0.5s ease-out; }
+  body.loaded .scene { opacity: 1; }
 
   .scene {
     /* Card width is the smallest of: the viewport width minus body padding,
@@ -816,6 +828,17 @@
       card.classList.toggle('flipped');
     }
   });
+
+  // Fade the card in as soon as every image, SVG, and font has finished
+  // loading — so logos appear together rather than one-by-one. Safety
+  // fallback: reveal after 4s no matter what, in case some asset stalls.
+  function reveal() { document.body.classList.add('loaded'); }
+  if (document.readyState === 'complete') {
+    reveal();
+  } else {
+    window.addEventListener('load', reveal);
+    setTimeout(reveal, 4000);
+  }
 </script>
 </body>
 </html>
