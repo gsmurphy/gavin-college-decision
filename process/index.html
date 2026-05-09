@@ -1,385 +1,442 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gavin's College Decision · 2026</title>
-<meta name="description" content="Gavin Murphy · Class of 2030. Tap to flip — and don't miss the grad party invite!">
-<!-- Open Graph tags so iMessage / Slack / Twitter etc. show a richer link preview -->
-<meta property="og:title" content="Gavin's College Decision · 2026">
-<meta property="og:description" content="Gavin Murphy · Class of 2030. Tap to flip — and don't miss the grad party invite!">
-<meta property="og:type" content="website">
-<meta property="og:image" content="https://gsmurphy.github.io/gavin-college-decision/preview.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="1597">
-<meta property="og:image:alt" content="Gavin smiling at The Criterion in St Andrews, Scotland — with a meat pie">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="https://gsmurphy.github.io/gavin-college-decision/preview.jpg">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Making of — Gavin's College Decision</title>
+<meta name="description" content="Two maps, one decision. How an illustrated announcement card and a real GIS analysis grew from the same set of choices.">
+<meta property="og:title" content="Making of — Gavin's College Decision">
+<meta property="og:description" content="How an illustrated announcement card and a real GIS analysis grew from the same set of choices.">
+<meta property="og:type" content="article">
+<meta property="og:image" content="../gavin_photos/Gavin_St_Andrews_Castle_centered.png">
 <style>
   :root {
     --paper: #eee5cf;
     --paper-warm: #efe0bb;
-    --ink: #231F20;
-    --muted: #7a6b52;
     --ocean: #f3ead0;
+    --ink: #231F20;
     --ink-dark: #3a2a1a;
-
+    --muted: #7a6b52;
     --st-andrews: #0065BD;
+    --st-andrews-dk: #00539B;
+    --rule: #c4b78f;
+    --red: #b32028;
   }
-
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
-
   body {
     font-family: 'Georgia', 'Garamond', serif;
     background: linear-gradient(135deg, #d8c9ad 0%, #bba98b 100%);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
     color: var(--ink);
+    min-height: 100vh;
+    line-height: 1.6;
   }
 
-  /* Hide the card on first paint and fade it in only after every image,
-     SVG, and font has finished loading. Prevents the "logos popping in
-     one by one" effect — the user sees the card appear all at once. */
-  .scene { opacity: 0; transition: opacity 0.5s ease-out; }
-  body.loaded .scene { opacity: 1; }
-
-  .scene {
-    width: 100%;
-    max-width: 1000px;
-    perspective: 2400px;
-    /* Establish a size container so back-of-card text can scale with the
-       card width (cqw units) — keeps text readable on phones. */
-    container-type: inline-size;
-  }
-
-  .card {
-    width: 100%;
-    aspect-ratio: 9 / 6;
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 1s cubic-bezier(0.4, 0.0, 0.2, 1);
-    cursor: pointer;
-  }
-  .card.flipped { transform: rotateY(180deg); }
-
-  .face {
-    position: absolute;
-    inset: 0;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
+  .page {
+    max-width: 1040px;
+    margin: 32px auto;
     background: var(--paper);
+    border-radius: 4px;
     box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3),
                 0 10px 20px -10px rgba(0,0,0,0.15);
-    border-radius: 4px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    padding: 8px;  /* beige inset border around everything on the card */
+    padding: 56px 64px 48px;
   }
-  .face.back { transform: rotateY(180deg); }
 
-  /* FRONT — v2: map centered with even border, title moved INTO the ocean */
-  .map-container {
-    flex: 1 1 auto;
-    padding: 18px;  /* combined with face padding 8 = 26px border on all sides */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 0;
-  }
-  .map-svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-  }
-  .cta {
-    font-size: 10px;
-    letter-spacing: 0.45em;
+  /* Top bar */
+  .topnav {
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 16px;
+    margin-bottom: 32px;
+    font-size: 12px;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--muted);
-    animation: pulse-hint 3s ease-in-out infinite;
   }
-  @keyframes pulse-hint {
-    0%, 100% { opacity: 0.55; }
-    50% { opacity: 1; }
+  .topnav a {
+    color: var(--st-andrews-dk);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+  }
+  .topnav a:hover { border-bottom-color: var(--st-andrews-dk); }
+  .topnav .crumbs span { margin: 0 6px; color: var(--muted); }
+
+  /* Header */
+  .header { margin-bottom: 32px; }
+  .eyebrow {
+    font-style: italic; color: var(--muted); font-size: 16px;
+  }
+  h1 {
+    font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+    color: var(--st-andrews-dk);
+    font-size: 46px;
+    line-height: 1.08;
+    margin: 4px 0 14px;
+    letter-spacing: -0.005em;
+  }
+  .deck {
+    font-size: 18px; color: var(--ink-dark); max-width: 760px; line-height: 1.55;
   }
 
-  /* BACK — landscape layout: title strip on top + 3x3 photo grid below */
-  .back {
-    padding: 14px 18px 18px;
-    display: grid !important;  /* override flex-column from .face */
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: auto 1fr 1.55fr 1.4fr;  /* bottom row taller to host party info */
-    gap: 6px;
-    background:
-      radial-gradient(ellipse at center, rgba(0,101,189,0.05) 0%, transparent 70%),
-      linear-gradient(150deg, var(--paper) 0%, var(--paper-warm) 100%);
+  /* Wide hero photo of the destination */
+  .destination-hero {
+    margin: 36px -8px 18px;
+    aspect-ratio: 16 / 7;
+    overflow: hidden;
+    border-radius: 3px;
+    border: 1px solid var(--rule);
+    background: var(--paper-warm);
+    position: relative;
   }
-  .back-title-strip {
-    grid-column: 1 / -1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    padding: 2px 12px 8px;
+  .destination-hero img {
+    width: 100%; height: 100%; object-fit: cover; object-position: center 40%;
+    display: block;
   }
-  .back-title-strip .preamble {
-    /* Scales with card width (cqw) — capped at 20px on desktop, floors at
-       11px on phones so it stays legible. */
-    font-size: clamp(11px, 2cqw, 20px);
+  .destination-hero .quote {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 18px 24px;
+    background: linear-gradient(0deg, rgba(35,31,32,0.72), rgba(35,31,32,0));
+    color: #fdf6df;
+    font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+    font-size: 22px;
     font-style: italic;
-    font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
-    color: #00539B;
-    letter-spacing: 0.03em;
-    line-height: 1.1;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4);
   }
-  .back-title-strip h2 {
-    /* Same scaling treatment for the headline. white-space:nowrap removed
-       so on very narrow phones the title can wrap rather than overflow. */
-    font-size: clamp(13px, 3.4cqw, 34px);
-    font-weight: 400;
-    margin: 0;
-    color: #00539B;
-    font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
-    letter-spacing: 0.02em;
-    text-align: center;
-    line-height: 1.1;
+  .destination-hero .quote strong {
+    font-style: normal; font-weight: 600; color: #fff;
   }
-  .back-cell {
+
+  /* Section type */
+  h2 {
+    font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+    color: var(--st-andrews-dk);
+    font-size: 28px;
+    line-height: 1.15;
+    margin: 56px 0 18px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--rule);
+  }
+  h3 {
+    font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+    color: var(--ink-dark);
+    font-size: 20px;
+    margin: 28px 0 8px;
+  }
+  p { font-size: 16px; margin: 0 0 14px; }
+  p.lead { font-size: 18px; color: var(--ink-dark); line-height: 1.55; }
+  em.key { color: var(--st-andrews-dk); font-style: italic; font-weight: 600; }
+  a.inline { color: var(--st-andrews-dk); text-decoration: none; border-bottom: 1px solid var(--st-andrews-dk); }
+  a.inline:hover { color: var(--st-andrews); }
+
+  /* Card-vs-map side by side */
+  .two-up {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin: 18px 0 28px;
+  }
+  .two-up figure { margin: 0; }
+  .two-up .frame {
+    aspect-ratio: 9 / 6;
+    background: var(--paper);
+    border: 1px solid var(--rule);
     border-radius: 3px;
     overflow: hidden;
-    border: 1px solid rgba(0, 0, 0, 0.18);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
-    background: var(--paper);
+    position: relative;
   }
-  .back-cell img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+  .two-up .frame .label {
+    position: absolute; top: 10px; left: 12px;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--st-andrews-dk); background: rgba(238,229,207,0.85);
+    padding: 3px 7px; border-radius: 2px; z-index: 2;
   }
-  .back-cell.cell-contain img {
-    object-fit: contain;
-    background: var(--paper);
+  .two-up .frame svg, .two-up .frame img {
+    width: 100%; height: 100%; display: block; object-fit: cover;
   }
-  .back-cell.cell-zoom-shield img {
-    object-position: center 65%;  /* shift crop down so more of the shield's bottom is visible */
-    transform: translateY(-15px) scale(1.6);
-    transform-origin: center 60%;
+  .two-up figcaption {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
   }
-  .cell-hero {
-    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-  }
-  .cell-logo {
-    border: none;
-    box-shadow: none;
-    background: transparent;
-    display: flex;
-    flex-direction: column;
+  .two-up figcaption strong { color: var(--ink); font-style: normal; }
+
+  /* Sixteen acceptances logo wall */
+  .acceptances {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: center;
-    text-align: center;
+    gap: 24px;
+    margin: 24px 0 20px;
+    padding: 28px 24px;
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+  }
+  .accept-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px 18px;
+    align-items: center;
+    justify-items: center;
+  }
+  .accept-tile {
+    width: 100%; aspect-ratio: 1 / 1;
+    display: flex; align-items: center; justify-content: center;
     padding: 6px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    transition: transform 0.2s ease;
+    filter: grayscale(35%) contrast(0.92);
+    opacity: 0.85;
   }
-  .cell-text {
-    /* Subtle inset treatment so the text block reads as a deliberate plaque
-       within the grid rather than an empty-space gap between photos. */
-    background: rgba(0, 0, 0, 0.035);
-    border: 1px solid rgba(0, 0, 0, 0.14);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  .accept-tile:hover {
+    transform: translateY(-2px);
+    filter: none; opacity: 1;
+  }
+  .accept-tile img {
+    max-width: 84%; max-height: 84%; object-fit: contain;
+  }
+  .accept-tile .name {
+    font-size: 9px; color: var(--muted);
+    text-align: center; margin-top: 2px;
+    display: none;
+  }
+  .accept-arrow {
+    font-family: 'Palatino', serif;
+    color: var(--st-andrews-dk);
+    font-size: 38px;
     text-align: center;
-    padding: 6px;
+    line-height: 1;
   }
-  /* (cell-logo styles removed — shield photo is now a regular photo cell and
-       the title lives in the full-width strip across the top of the back) */
-  .cell-text {
-    font-family: 'Palatino', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
-    line-height: 1.3;
-    gap: 4px;
-    padding: 8px 4px;
-  }
-  /* All cell-text font sizes use clamp(min, Xcqw, max) so they scale with
-     the card width on phones while keeping the desktop look unchanged. */
-  .cell-text .line {
-    font-size: clamp(11px, 2cqw, 20px);
-    line-height: 1.25;
-    color: #00539B;  /* St Andrews blue for all body text */
-  }
-  .cell-text .line-founded {
-    font-style: italic;
-  }
-  .cell-text .line-class {
-    font-size: clamp(15px, 3cqw, 30px);
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    margin: 4px 0;
-  }
-  .cell-text .line-divider {
-    /* Thin horizontal rule between St Andrews info and party info */
-    width: 60%;
-    height: 1px;
-    background: rgba(0, 83, 155, 0.25);
-    margin: 8px 0 4px;
-  }
-  .cell-text .line-party {
-    font-size: clamp(10px, 1.6cqw, 16px);
-    font-weight: 600;
-    color: #b32028;  /* warm celebratory red */
-    letter-spacing: 0.01em;
-  }
-  .cell-text .line-rsvp {
-    font-size: clamp(8px, 1.3cqw, 13px);
-    color: #00539B;
-    letter-spacing: 0.01em;
-    margin-top: 6px;
-  }
-  .cell-text .line-rsvp a {
-    color: inherit;
-    text-decoration: underline;
-    text-decoration-thickness: 0.5px;
-    text-underline-offset: 2px;
-  }
-  .cell-text .line-rsvp a:hover {
-    color: #003a6c;
-  }
-  .cell-text .line-meta {
-    /* Small companion-piece pointer to the analysis pages */
-    font-size: clamp(7px, 1.05cqw, 10.5px);
-    color: #7a6b52;
-    font-style: italic;
-    letter-spacing: 0.02em;
-    margin-top: 8px;
-  }
-  .cell-text .line-meta a {
-    color: #7a6b52;
-    text-decoration: underline;
-    text-decoration-thickness: 0.4px;
-    text-underline-offset: 2px;
-  }
-  .cell-text .line-meta a:hover { color: #00539B; }
-  .cell-placeholder {
-    background:
-      repeating-linear-gradient(45deg,
-        rgba(0,101,189,0.10) 0 6px,
-        rgba(0,101,189,0.04) 6px 12px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 9px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-style: italic;
-    text-align: center;
-    line-height: 1.4;
-  }
-  .photo-trio .photo img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .photo-trio .placeholder-photo {
-    background:
-      repeating-linear-gradient(45deg,
-        rgba(0,101,189,0.10) 0 6px,
-        rgba(0,101,189,0.04) 6px 12px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 9px;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-style: italic;
-    text-align: center;
-    line-height: 1.4;
-  }
-  .facts-line {
-    font-size: 11px;
-    text-align: center;
-    color: var(--ink);
-    line-height: 1.55;
-    margin-bottom: 12px;
-    font-family: 'Georgia', serif;
-  }
-  .facts-line em {
-    font-style: italic;
-    color: var(--st-andrews);
-    font-weight: normal;
-  }
-  .back-title {
-    text-align: center;
-    font-size: clamp(22px, 3.2vw, 28px);
-    font-weight: 400;
-    margin: 0 0 4px;
-    line-height: 1.1;
-    color: var(--st-andrews);
-  }
-  .back-subtitle {
-    text-align: center;
-    font-size: 10px;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 14px;
-  }
-  .divider {
-    width: 60px; height: 1px; background: var(--muted);
-    margin: 0 auto 22px; opacity: 0.4;
-  }
-  .facts {
-    list-style: none; padding: 0; margin: 0 0 26px;
-    text-align: center;
-  }
-  .facts li { font-size: 13px; padding: 4px 0; line-height: 1.5; }
-  .facts li em { font-style: italic; color: var(--st-andrews); }
-  .details {
-    background: rgba(0, 101, 189, 0.06);
-    border-left: 3px solid var(--st-andrews);
-    padding: 14px 18px; margin-bottom: 12px;
-  }
-  .detail-row {
-    display: flex; justify-content: space-between;
-    align-items: baseline; gap: 16px; padding: 4px 0;
-  }
-  .detail-label {
-    font-size: 9px; letter-spacing: 0.22em;
-    text-transform: uppercase; color: var(--muted); flex-shrink: 0;
-  }
-  .detail-value { font-size: 13px; text-align: right; color: var(--ink); }
-  .placeholder { color: var(--muted); font-style: italic; opacity: 0.7; }
-  .back-footer {
-    margin-top: auto; padding-top: 18px; text-align: center;
-    font-size: 10px; letter-spacing: 0.3em;
+  .accept-arrow .arrow-cap {
+    display: block; font-size: 11px; letter-spacing: 0.14em;
     text-transform: uppercase; color: var(--muted);
+    font-family: Georgia, serif; margin-top: 4px;
+  }
+  .accept-chosen {
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; gap: 10px;
+  }
+  .accept-chosen-tile {
+    width: 100%; max-width: 200px; aspect-ratio: 1 / 1;
+    display: flex; align-items: center; justify-content: center;
+    padding: 18px;
+    background: var(--paper);
+    border: 2px solid var(--st-andrews);
+    border-radius: 4px;
+    box-shadow: 0 0 0 4px rgba(0,101,189,0.10);
+  }
+  .accept-chosen-tile img { max-width: 88%; max-height: 88%; object-fit: contain; }
+  .accept-chosen-name {
+    font-family: 'Palatino', serif;
+    color: var(--st-andrews-dk);
+    font-size: 16px; font-weight: bold;
+    line-height: 1.25;
+  }
+  .accept-chosen-sub {
+    font-size: 12px; font-style: italic; color: var(--muted);
+  }
+  .accept-caption {
+    grid-column: 1 / -1;
+    font-size: 13px; font-style: italic; color: var(--muted);
+    text-align: center;
+    margin-top: 12px;
   }
 
-  /* SVG emblem base */
-  .emblem-label {
-    font-family: 'Georgia', serif;
+  /* What's real / stylised table */
+  .compare {
+    display: grid;
+    grid-template-columns: 200px 1fr 1fr;
+    gap: 0;
+    margin: 18px 0 28px;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .compare > div {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 14px;
+  }
+  .compare > div:nth-child(3n+1) {
     font-weight: bold;
+    color: var(--ink-dark);
+    background: var(--ocean);
+    border-right: 1px solid var(--rule);
+  }
+  .compare > div:nth-child(3n+2) {
+    border-right: 1px solid var(--rule);
+    color: var(--ink);
+  }
+  .compare > div:nth-child(3n+3) {
+    color: var(--ink);
+  }
+  .compare > .head {
+    background: var(--paper-warm) !important;
+    color: var(--st-andrews-dk) !important;
+    font-family: 'Palatino', serif;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  /* Pipeline diagram */
+  .pipeline {
+    background: var(--paper-warm);
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    padding: 22px 24px;
+    margin: 18px 0 28px;
+  }
+  .pipeline svg { width: 100%; height: auto; display: block; }
+
+  /* Bar chart embed */
+  .chart-block {
+    margin: 18px 0 28px;
+    padding: 14px;
+    border: 1px solid var(--rule);
+    border-radius: 3px;
+    background: var(--paper-warm);
+  }
+  .chart-block img {
+    width: 100%; display: block;
+  }
+
+  /* Welcome to St Andrews photo strip */
+  .photo-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 18px 0 28px;
+  }
+  .photo-strip figure {
+    margin: 0;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border-radius: 3px;
+    border: 1px solid var(--rule);
+    position: relative;
+    background: var(--paper-warm);
+  }
+  .photo-strip img {
+    width: 100%; height: 100%; object-fit: cover;
+    display: block;
+    transition: transform 0.4s ease;
+  }
+  .photo-strip figure:hover img {
+    transform: scale(1.04);
+  }
+  .photo-strip figcaption {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    padding: 10px 12px;
+    background: linear-gradient(0deg, rgba(35,31,32,0.78), rgba(35,31,32,0));
+    color: #fdf6df;
+    font-family: 'Palatino', serif;
+    font-size: 13px;
+    font-style: italic;
+    line-height: 1.3;
+  }
+
+  /* Source files list */
+  .files {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 24px;
+    font-size: 14px;
+  }
+  .files li::before { content: "/  "; color: var(--muted); }
+  .files a { color: var(--st-andrews-dk); text-decoration: none; }
+  .files a:hover { text-decoration: underline; }
+  .files .note { color: var(--muted); font-size: 12px; font-style: italic; }
+
+  /* Footer */
+  .pagefoot {
+    margin-top: 60px;
+    padding-top: 18px;
+    border-top: 1px solid var(--rule);
+    font-size: 12px;
+    color: var(--muted);
+    display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .pagefoot a { color: var(--st-andrews-dk); text-decoration: none; }
+  .pagefoot a:hover { text-decoration: underline; }
+
+  @media (max-width: 800px) {
+    .page { padding: 32px 22px 28px; margin: 16px 8px; }
+    h1 { font-size: 32px; }
+    .destination-hero { aspect-ratio: 4 / 3; margin: 24px -4px 14px; }
+    .destination-hero .quote { font-size: 16px; padding: 14px 16px; }
+    .two-up { grid-template-columns: 1fr; }
+    .acceptances { grid-template-columns: 1fr; }
+    .accept-arrow { transform: rotate(90deg); margin: 8px 0; }
+    .accept-grid { grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .compare { grid-template-columns: 1fr; }
+    .compare > div:nth-child(3n+1) { border-bottom: 1px solid var(--rule); }
+    .compare > div { border-right: none !important; }
+    .photo-strip { grid-template-columns: repeat(2, 1fr); }
+    .files { grid-template-columns: 1fr; }
   }
 </style>
 </head>
 <body>
-<div class="scene">
-  <div class="card" id="card" role="button" tabindex="0"
-       aria-label="Click or press Enter to open the card">
+<div class="page">
 
-    <!-- ================== FRONT (v2: title lives in the ocean) ================== -->
-    <div class="face front">
-      <div class="map-container">
-        <svg class="map-svg" viewBox="0 0 900 580" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <nav class="topnav">
+    <div class="crumbs">
+      <a href="../">The card</a><span>·</span>
+      <a href="../map/">The map</a><span>·</span>
+      <span style="color:var(--ink)">Making of</span>
+    </div>
+    <div>Gavin · Class of 2030</div>
+  </nav>
+
+  <header class="header">
+    <div class="eyebrow">Two maps, one decision</div>
+    <h1>How an announcement card grew out of a real geography problem.</h1>
+    <p class="deck">
+      I started with the announcement — an illustrated atlas card flipped to reveal
+      photographs and details. It had to feel like a keepsake. But under the imagery,
+      the geography is real: a high-export state, sixteen schools that said yes, and
+      one that's a five-thousand-kilometre crossing away. So I made both versions of
+      the same map.
+    </p>
+  </header>
+
+  <!-- =================== HERO PHOTO =================== -->
+  <div class="destination-hero">
+    <img src="../gavin_photos/Gavin_St_Andrews_Castle_centered.png" alt="Gavin at St Andrews Castle, Scotland.">
+    <div class="quote">
+      <strong>St Andrews, Scotland.</strong>  This is where it ended.
+    </div>
+  </div>
+
+  <p class="lead">
+    The card opens with a question — <em class="key">where will Gavin go next?</em>
+    The data map answers it — <em class="key">further than almost anywhere else in
+    his year would.</em> This is what's between the two.
+  </p>
+
+  <!-- =================== CARD vs MAP =================== -->
+  <h2>Designed first, built second</h2>
+
+  <p>
+    Both pages tell the same story but from opposite ends. The card is what you give
+    to family and friends — warm, illustrated, animated when you tap it. The data
+    map is what you give to the part of yourself that wants to know the answer is
+    real.
+  </p>
+
+  <div class="two-up">
+    <figure>
+      <div class="frame">
+        <div class="label">The card</div>
+        <!-- Inline SVG injected by build script -->
+        <svg class="map-svg" preserveAspectRatio="xMidYMid meet" style="width:100%;height:100%;display:block;" viewBox="0 0 900 580" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <defs>
             <!-- Subtle paper texture via filter -->
             <filter id="paper-noise">
@@ -536,60 +593,60 @@
           <!-- Bates College (Lewiston, ME) — nudged down ~10px from prior
                position. -->
           <g class="emblem" transform="translate(298, 149.75)">
-            <image href="logos/bates-bobcat.png" x="-23" y="-23" width="46" height="46" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/bates-bobcat.png" x="-23" y="-23" width="46" height="46" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- Boston College (Chestnut Hill, MA) — sits just below Bates. -->
           <g class="emblem" transform="translate(281.5, 208)">
-            <image href="logos/bc-eagle.svg" x="-16" y="-16" width="32" height="32" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/bc-eagle.svg" x="-16" y="-16" width="32" height="32" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- UMass Amherst (Amherst, MA) -->
           <g class="emblem" transform="translate(245.7, 207.7)">
-            <image href="logos/umass.png" x="-19" y="-19" width="38" height="38" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/umass.png" x="-19" y="-19" width="38" height="38" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- Skidmore College (Saratoga Springs, NY) -->
           <g class="emblem" transform="translate(183.2, 197.8)">
-            <image href="logos/skidmore.png" x="-35" y="-28" width="70" height="56" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/skidmore.png" x="-35" y="-28" width="70" height="56" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- Vassar College (Poughkeepsie, NY) — shrunk ~30% so it sits
                quietly above the Rutgers logo. Nudged up ~10px. -->
           <g class="emblem" transform="translate(199.5, 223.55)">
-            <image href="logos/vassar-vc.svg" x="-12" y="-12" width="24" height="24" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/vassar-vc.svg" x="-12" y="-12" width="24" height="24" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- Wesleyan University (Middletown, CT) -->
           <g class="emblem" transform="translate(236.8, 247.6)">
-            <image href="logos/wesleyan.png" x="-19" y="-19" width="38" height="38" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/wesleyan.png" x="-19" y="-19" width="38" height="38" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- Connecticut College (New London, CT) -->
           <g class="emblem" transform="translate(271.1, 254.1)">
-            <image href="logos/conncoll.svg" x="-18" y="-18" width="36" height="36" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/conncoll.svg" x="-18" y="-18" width="36" height="36" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- Rutgers University (New Brunswick, NJ) — moved up to the very
                top of New Jersey (along the NY border) so the "Raised"
                Princeton dot below it has room to breathe. -->
           <g class="emblem" transform="translate(200, 250)">
-            <image href="logos/rutgers-r.svg" x="-14" y="-14" width="28" height="28" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/rutgers-r.svg" x="-14" y="-14" width="28" height="28" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- University of Delaware (Newark, DE) -->
           <g class="emblem" transform="translate(167.9, 338.6)">
-            <image href="logos/udel.svg" x="-23" y="-23" width="46" height="46" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/udel.svg" x="-23" y="-23" width="46" height="46" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- William & Mary (Williamsburg, VA) -->
           <g class="emblem" transform="translate(105.7, 392.2)">
-            <image href="logos/wm.svg" x="-35" y="-35" width="70" height="70" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/wm.svg" x="-35" y="-35" width="70" height="70" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- College of Charleston (Charleston, SC) -->
           <g class="emblem" transform="translate(100.5, 513.7)">
-            <image href="logos/charleston-randolph.webp" x="-53" y="-53" width="106" height="106" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/charleston-randolph.webp" x="-53" y="-53" width="106" height="106" preserveAspectRatio="xMidYMid meet"/>
           </g>
           </g>  <!-- end US panel emblems -->
 
@@ -597,27 +654,27 @@
           <g transform="translate(-104,-55) scale(1.15)">
           <!-- University of St Andrews (Fife, Scotland) -->
           <g class="emblem" transform="translate(784.6, 113.5)">
-            <image href="logos/st-andrews.svg" x="-17" y="-17" width="34" height="34" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/st-andrews.svg" x="-17" y="-17" width="34" height="34" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- University of Edinburgh (Edinburgh) -->
           <g class="emblem" transform="translate(777.6, 151.7)">
-            <image href="logos/edinburgh.svg" x="-20" y="-20" width="40" height="40" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/edinburgh.svg" x="-20" y="-20" width="40" height="40" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- University of Cambridge (Cambridge) -->
           <g class="emblem" transform="translate(809.5, 202)">
-            <image href="logos/cambridge.png" x="-10" y="-10" width="20" height="20" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/cambridge.png" x="-10" y="-10" width="20" height="20" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- University College London -->
           <g class="emblem" transform="translate(808.9, 220.6)">
-            <image href="logos/ucl.svg" x="-21" y="-15" width="42" height="30" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/ucl.svg" x="-21" y="-15" width="42" height="30" preserveAspectRatio="xMidYMid meet"/>
           </g>
 
           <!-- King's College London -->
           <g class="emblem" transform="translate(813.9, 239.7)">
-            <image href="logos/kcl.svg" x="-16" y="-10" width="32" height="20" preserveAspectRatio="xMidYMid meet"/>
+            <image href="../logos/kcl.svg" x="-16" y="-10" width="32" height="20" preserveAspectRatio="xMidYMid meet"/>
           </g>
           </g>  <!-- end UK panel emblems -->
 
@@ -762,91 +819,285 @@
 
         </svg>
       </div>
+      <figcaption>
+        <strong>Designed first.</strong> Hand-curved coastlines on a cream page,
+        sailboat crossing the ocean, title sitting in the Atlantic.
+      </figcaption>
+    </figure>
+    <figure>
+      <div class="frame">
+        <div class="label">The map</div>
+        <img src="../map/print.png" alt="Print-quality choropleth map of US states with accepted schools and the Princeton-to-St-Andrews great-circle line.">
+      </div>
+      <figcaption>
+        <strong>Built second.</strong> NCES choropleth, geodesic line on the WGS84
+        ellipsoid, Lambert Azimuthal Equal Area projection.
+      </figcaption>
+    </figure>
+  </div>
 
+  <!-- =================== SIXTEEN ACCEPTANCES =================== -->
+  <h2>Sixteen acceptances</h2>
+
+  <p>
+    Sixteen schools said yes. Each is a real letter, a real visit, a real version
+    of the next four years. Fifteen of them turned into a polite no, thank you.
+    One of them turned into an answer.
+  </p>
+
+  <div class="acceptances">
+    <div class="accept-grid">
+      <div class="accept-tile" title="College of Charleston"><img src="../logos/charleston-randolph.webp" alt="College of Charleston"></div>
+      <div class="accept-tile" title="William & Mary"><img src="../logos/wm.svg" alt="William & Mary"></div>
+      <div class="accept-tile" title="University of Delaware"><img src="../logos/udel.svg" alt="University of Delaware"></div>
+      <div class="accept-tile" title="Rutgers University"><img src="../logos/rutgers-r.svg" alt="Rutgers University"></div>
+      <div class="accept-tile" title="Wesleyan University"><img src="../logos/wesleyan.png" alt="Wesleyan University"></div>
+      <div class="accept-tile" title="Skidmore College"><img src="../logos/skidmore.png" alt="Skidmore College"></div>
+      <div class="accept-tile" title="Vassar College"><img src="../logos/vassar-vc.svg" alt="Vassar College"></div>
+      <div class="accept-tile" title="UMass Amherst"><img src="../logos/umass.png" alt="UMass Amherst"></div>
+      <div class="accept-tile" title="Connecticut College"><img src="../logos/conncoll.svg" alt="Connecticut College"></div>
+      <div class="accept-tile" title="Boston College"><img src="../logos/bc-eagle.svg" alt="Boston College"></div>
+      <div class="accept-tile" title="Bates College"><img src="../logos/bates-bobcat.png" alt="Bates College"></div>
+      <div class="accept-tile" title="University College London"><img src="../logos/ucl.svg" alt="University College London"></div>
+      <div class="accept-tile" title="King's College London"><img src="../logos/kcl.svg" alt="King's College London"></div>
+      <div class="accept-tile" title="University of Cambridge"><img src="../logos/cambridge.png" alt="University of Cambridge"></div>
+      <div class="accept-tile" title="University of Edinburgh"><img src="../logos/edinburgh.svg" alt="University of Edinburgh"></div>
     </div>
 
-    <!-- ================== BACK (title strip + 3x3 photo grid) ================== -->
-    <div class="face back">
-      <!-- Title strip spans all 3 columns across the top -->
-      <div class="back-title-strip">
-        <h2>Gavin is going to University of St Andrews!</h2>
-      </div>
+    <div class="accept-arrow">
+      →
+      <span class="arrow-cap">chose</span>
+    </div>
 
-      <!-- Top photo row: quadrangle / shield / aerial pier walk -->
-      <div class="back-cell">
-        <img src="U_of_St_Andrews_images/salvators-quad.jpg" alt="St Salvator's Quadrangle"/>
+    <div class="accept-chosen">
+      <div class="accept-chosen-tile">
+        <img src="../logos/st-andrews.svg" alt="University of St Andrews">
       </div>
-      <div class="back-cell cell-zoom-shield">
-        <img src="gavin_photos/Just_the_Shield_Photo.png" alt="University of St Andrews shield"/>
-      </div>
-      <div class="back-cell">
-        <img src="U_of_St_Andrews_images/Pier_Walk_red_gowns.jpg"
-             alt="Students in red gowns on the St Andrews Pier Walk"
-             style="object-position: center 40%;"/>
-      </div>
+      <div class="accept-chosen-name">University of St&nbsp;Andrews</div>
+      <div class="accept-chosen-sub">Founded 1413 · Psychology &amp; Neuroscience, BSc</div>
+    </div>
 
-      <!-- ML: Gavin at the outdoor pub -->
-      <div class="back-cell">
-        <img src="gavin_photos/Gavin_solo_outdoor_pub.png" alt="Gavin"/>
-      </div>
-
-      <!-- MC: Gavin at St Andrews Castle (new hero) -->
-      <div class="back-cell cell-hero">
-        <img src="gavin_photos/Gavin_St_Andrews_Castle_centered.png" alt="Gavin at St Andrews Castle"/>
-      </div>
-
-      <!-- MR: Gavin in a pub (interior) -->
-      <div class="back-cell">
-        <img src="gavin_photos/Gavin_solo_in_pub.png" alt="Gavin"/>
-      </div>
-
-      <!-- BL: Red gowns in cloister -->
-      <div class="back-cell">
-        <img src="U_of_St_Andrews_images/red-gowns-cloister.jpg" alt="Students in red gowns"/>
-      </div>
-
-      <!-- BC: Five-line text strip -->
-      <div class="back-cell cell-text">
-        <div class="line line-founded">Founded 1413 &nbsp;|&nbsp; Ever to Excel</div>
-        <div class="line line-class">Class of 2030!</div>
-        <div class="line line-studying">Psychology &amp; Neuroscience, BSc</div>
-        <div class="line-divider"></div>
-        <div class="line line-party">HS Grad Party: 6/20 &middot; 2pm &middot; Sewell, NJ</div>
-        <div class="line line-rsvp"><a href="mailto:gavinmurphy0614@gmail.com?subject=Gavin's%20Grad%20Party%20RSVP">RSVP: gavinmurphy0614@gmail.com</a></div>
-        <div class="line line-meta"><a href="map/">See the geography</a> · <a href="process/">making of</a></div>
-      </div>
-
-      <!-- BR: Raisin Monday — student smiling, foam-covered, in the
-           middle of the chaos. Better focal point than the prior shot. -->
-      <div class="back-cell">
-        <img src="U_of_St_Andrews_images/Raisin_Monday_2025.jpg"
-             alt="Raisin Monday foam fight at St Andrews"
-             style="object-position: center 35%;"/>
-      </div>
+    <div class="accept-caption">
+      Hover any logo to see it in colour. The grid is the data layer behind the dots
+      on the map.
     </div>
   </div>
+
+  <!-- =================== WHAT'S REAL / WHAT'S STYLIZED =================== -->
+  <h2>What's real, what's stylised</h2>
+
+  <p>
+    The card takes deliberate licence. The map doesn't. Holding both up next to each
+    other made the licence-taking visible to me in ways I didn't expect — design
+    decisions I'd been making by feel turned out to be tradable, and I could pick.
+  </p>
+
+  <div class="compare">
+    <div class="head">Element</div>
+    <div class="head">On the card</div>
+    <div class="head">On the data map</div>
+
+    <div>Layout</div>
+    <div>Two-panel atlas: US on the left, UK on the right, ocean in the middle. Compresses the Atlantic so both endpoints fit a 9:6 card.</div>
+    <div>Single Lambert Azimuthal Equal Area projection centred near the great-circle midpoint (52°N, 40°W). Shows the actual ocean distance to scale.</div>
+
+    <div>Coastlines</div>
+    <div>Hand-traced from Natural Earth admin_1 50m, then simplified for an illustrated feel. Some islands left out for texture.</div>
+    <div>us-atlas v3 (US Census CB 2017) for states, world-atlas v2 (Natural Earth 50m) for countries. Drawn at full fidelity.</div>
+
+    <div>The journey line</div>
+    <div>A sailboat between the two panels — a visual metaphor for "across the ocean," not an actual route.</div>
+    <div>Densified great-circle path generated with <code>pyproj.Geod.npts</code> on the WGS84 ellipsoid. The northward arc is geometric truth.</div>
+
+    <div>Distance</div>
+    <div>Implied. The boat is the answer.</div>
+    <div>5,340 km / 3,318 mi, computed geodesically and labelled at the line's midpoint.</div>
+
+    <div>NJ as origin</div>
+    <div>Implied by the pin and red dot. No quantitative claim.</div>
+    <div>NJ outlined; choropleth shows it as a top-quartile export state (43% of college-bound residents leave the state).</div>
+
+    <div>Other accepted schools</div>
+    <div>None. The card is about the destination, not the menu.</div>
+    <div>All sixteen plotted as points. The dense Northeast cluster gets numbered keys; outliers get inline labels.</div>
+
+    <div>Colour</div>
+    <div>Cream paper, St Andrews blue, warm earth tones for land. Picked for atmosphere.</div>
+    <div>Same palette, but the choropleth uses a 5-class ramp from cream → St Andrews blue. Picked so the chosen school's colour <em>is</em> the deepest data class.</div>
+  </div>
+
+  <!-- =================== PIPELINE =================== -->
+  <h2>The pipeline</h2>
+
+  <p>
+    Both pages share the same data spine. The card was built from the data; the data
+    map was built from the same data. Nothing about the underlying analysis is
+    duplicated.
+  </p>
+
+  <div class="pipeline">
+    <svg viewBox="0 0 920 280" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                markerUnits="strokeWidth" markerWidth="8" markerHeight="8" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#7a6b52"/>
+        </marker>
+      </defs>
+      <style>
+        .box { fill: #eee5cf; stroke: #7a6b52; stroke-width: 1; }
+        .source { fill: #f3ead0; stroke: #7a6b52; stroke-width: 1; }
+        .out { fill: #0065BD; stroke: #00539B; stroke-width: 1; }
+        .lbl { font-family: Palatino, Georgia, serif; font-size: 14px; fill: #231F20; }
+        .lbl-sm { font-family: Georgia, serif; font-size: 11px; fill: #7a6b52; font-style: italic; }
+        .lbl-out { font-family: Palatino, Georgia, serif; font-size: 14px; fill: #ffffff; font-weight: bold; }
+        .conn { stroke: #7a6b52; stroke-width: 1.2; fill: none; }
+      </style>
+      <rect class="source" x="20" y="20"  width="180" height="46" rx="3"/>
+      <text class="lbl" x="32" y="42">NCES Table 309.20</text>
+      <text class="lbl-sm" x="32" y="58">migration share by state</text>
+      <rect class="source" x="20" y="86"  width="180" height="46" rx="3"/>
+      <text class="lbl" x="32" y="108">us-atlas v3</text>
+      <text class="lbl-sm" x="32" y="124">state polygons (Census)</text>
+      <rect class="source" x="20" y="152" width="180" height="46" rx="3"/>
+      <text class="lbl" x="32" y="174">world-atlas v2</text>
+      <text class="lbl-sm" x="32" y="190">country polygons (NE)</text>
+      <rect class="source" x="20" y="218" width="180" height="46" rx="3"/>
+      <text class="lbl" x="32" y="240">schools.csv</text>
+      <text class="lbl-sm" x="32" y="256">accepted &amp; chosen</text>
+
+      <rect class="box" x="280" y="60"  width="200" height="46" rx="3"/>
+      <text class="lbl" x="295" y="82">join + normalize</text>
+      <text class="lbl-sm" x="295" y="98">share = 1 − in-state ratio</text>
+
+      <rect class="box" x="280" y="125" width="200" height="46" rx="3"/>
+      <text class="lbl" x="295" y="147">project + classify</text>
+      <text class="lbl-sm" x="295" y="163">LAEA, 5 quantile classes</text>
+
+      <rect class="box" x="280" y="190" width="200" height="46" rx="3"/>
+      <text class="lbl" x="295" y="212">geodesic line</text>
+      <text class="lbl-sm" x="295" y="228">pyproj.Geod, 240 vertices</text>
+
+      <rect class="out" x="560" y="20"  width="200" height="56" rx="3"/>
+      <text class="lbl-out" x="572" y="46">Print map</text>
+      <text class="lbl-out" x="572" y="62" style="font-size:11px;font-weight:normal;">PDF · PNG · matplotlib</text>
+
+      <rect class="out" x="560" y="96" width="200" height="56" rx="3"/>
+      <text class="lbl-out" x="572" y="122">Web map</text>
+      <text class="lbl-out" x="572" y="138" style="font-size:11px;font-weight:normal;">HTML · Folium / Leaflet</text>
+
+      <rect class="out" x="560" y="172" width="200" height="56" rx="3"/>
+      <text class="lbl-out" x="572" y="198">The card</text>
+      <text class="lbl-out" x="572" y="214" style="font-size:11px;font-weight:normal;">illustrated SVG · hand-styled</text>
+
+      <path class="conn" d="M200,43 C 240,43 240,80 280,80" marker-end="url(#arrow)"/>
+      <path class="conn" d="M200,109 C 240,109 240,143 280,143" marker-end="url(#arrow)"/>
+      <path class="conn" d="M200,175 C 240,175 240,150 280,150" marker-end="url(#arrow)"/>
+      <path class="conn" d="M200,241 C 240,241 240,210 280,210" marker-end="url(#arrow)"/>
+
+      <path class="conn" d="M480,80  C 520,80  520,46 560,46" marker-end="url(#arrow)"/>
+      <path class="conn" d="M480,148 C 520,148 520,124 560,124" marker-end="url(#arrow)"/>
+      <path class="conn" d="M480,148 C 520,148 520,46 560,46" stroke-dasharray="4 3"/>
+      <path class="conn" d="M480,210 C 520,210 520,200 560,200" marker-end="url(#arrow)"/>
+
+      <text class="lbl-sm" x="20" y="276">sources</text>
+      <text class="lbl-sm" x="280" y="276">analysis</text>
+      <text class="lbl-sm" x="560" y="276">outputs</text>
+    </svg>
+  </div>
+
+  <!-- =================== WHAT THE DATA SAYS =================== -->
+  <h2>What the data actually says</h2>
+
+  <p>
+    The choropleth's claim is that New Jersey is unusual — a high-export state, where
+    a meaningful share of college-bound graduates leave to attend school somewhere
+    else. The card hints at this with the line crossing the ocean. The map proves it
+    with the colour ramp. Here's the receipt.
+  </p>
+
+  <div class="chart-block">
+    <img src="top10_export_states.png" alt="Bar chart of the top 10 US states by share of college-bound residents who attend out-of-state institutions. New Jersey at 43%, highlighted.">
+  </div>
+
+  <p>
+    NJ is seventh, behind DC (a special case), Vermont, Alaska, New Hampshire,
+    Connecticut, and Hawaii. Among states with five-million-plus residents, it's
+    near the top. Big states like Texas and California sit at 14% — most of their
+    college-bound students stay home. New Jersey's are wired differently.
+  </p>
+
+  <!-- =================== WELCOME TO ST ANDREWS =================== -->
+  <h2>Welcome to St Andrews</h2>
+
+  <p>
+    The card holds the photographs of the place. The data map gets you there.
+    Here's some of what's waiting on the other end of that 5,340-km arc.
+  </p>
+
+  <div class="photo-strip">
+    <figure>
+      <img src="../U_of_St_Andrews_images/salvators-quad.jpg" alt="St Salvator's Quadrangle, University of St Andrews.">
+      <figcaption>St Salvator's Quad</figcaption>
+    </figure>
+    <figure>
+      <img src="../U_of_St_Andrews_images/Pier_Walk_red_gowns.jpg" alt="Students in red gowns on the St Andrews Pier Walk.">
+      <figcaption>The Pier Walk</figcaption>
+    </figure>
+    <figure>
+      <img src="../U_of_St_Andrews_images/red-gowns-cloister.jpg" alt="Students in red gowns in the cloister.">
+      <figcaption>Red gowns, cloister</figcaption>
+    </figure>
+    <figure>
+      <img src="../U_of_St_Andrews_images/Raisin_Monday_2025.jpg" alt="Raisin Monday foam fight tradition.">
+      <figcaption>Raisin Monday</figcaption>
+    </figure>
+  </div>
+
+  <!-- =================== SOURCE FILES =================== -->
+  <h2>Source files &amp; code</h2>
+
+  <p>
+    Everything that produced these pages is in the repo. The pipeline runs end-to-end
+    from a clean checkout — same scripts, same data, same outputs — which is the
+    point of doing it this way instead of clicking around in QGIS by hand.
+  </p>
+
+  <h3>Data</h3>
+  <ul class="files">
+    <li><a href="https://nces.ed.gov/programs/digest/d23/tables/dt23_309.20.asp">NCES Digest Table 309.20</a> <span class="note">migration share, Fall 2022</span></li>
+    <li><a href="https://github.com/topojson/us-atlas">us-atlas v3</a> <span class="note">state polygons (Census CB 2017)</span></li>
+    <li><a href="https://github.com/topojson/world-atlas">world-atlas v2</a> <span class="note">country polygons (Natural Earth 50m)</span></li>
+    <li>schools.csv <span class="note">accepted schools, geocoded by hand</span></li>
+  </ul>
+
+  <h3>Code</h3>
+  <ul class="files">
+    <li><a href="https://github.com/gsmurphy/gavin-college-decision">gsmurphy/gavin-college-decision</a> <span class="note">repo (card + map + this page)</span></li>
+    <li>scripts/theme.py <span class="note">palette, fonts</span></li>
+    <li>scripts/data.py <span class="note">load + topojson decode</span></li>
+    <li>scripts/distances.py <span class="note">pyproj geodesic helpers</span></li>
+    <li>scripts/print_map.py <span class="note">matplotlib renderer</span></li>
+    <li>scripts/web_map.py <span class="note">Folium / Leaflet renderer</span></li>
+    <li>scripts/bar_chart.py <span class="note">top-10 export states</span></li>
+  </ul>
+
+  <h3>Outputs</h3>
+  <ul class="files">
+    <li><a href="../map/">Interactive web map</a> <span class="note">click to explore</span></li>
+    <li><a href="../map/print.pdf">Print PDF</a> <span class="note">portfolio-quality, 16×11</span></li>
+    <li><a href="../map/print.png">Print PNG</a> <span class="note">screen preview</span></li>
+  </ul>
+
+  <!-- =================== FOOTER =================== -->
+  <footer class="pagefoot">
+    <div>
+      Made for Gavin's announcement, with cream paper, St Andrews blue, and a great-circle path.
+    </div>
+    <div>
+      <a href="../">← back to the card</a>
+    </div>
+  </footer>
+
 </div>
-
-<script>
-  const card = document.getElementById('card');
-  card.addEventListener('click', () => card.classList.toggle('flipped'));
-  card.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      card.classList.toggle('flipped');
-    }
-  });
-
-  // Fade the card in as soon as every image, SVG, and font has finished
-  // loading — so logos appear together rather than one-by-one. Safety
-  // fallback: reveal after 4s no matter what, in case some asset stalls.
-  function reveal() { document.body.classList.add('loaded'); }
-  if (document.readyState === 'complete') {
-    reveal();
-  } else {
-    window.addEventListener('load', reveal);
-    setTimeout(reveal, 4000);
-  }
-</script>
 </body>
 </html>
